@@ -6,6 +6,7 @@ import BookingWidget from '../BookingWidget';
 const PlacePage = () => {
     const {id}=useParams();
     const [place,setPlace] = useState(null);
+    const [source, setSource] = useState('')
     useEffect(()=>{
         if(!id){
             return;
@@ -15,8 +16,25 @@ const PlacePage = () => {
         })
 
     },[id]);
+    useEffect(()=>{
+      if(!id){
+          return;
+      }
+      // axios.get(`http://localhost:4000/api/travel`).then((res)=>{
+      //     setPlace(res.data);
+      // })
+
+  },[id]);
 
     if(!place) return '';
+
+  function handleTravelClick() {
+    const destination = place.title
+    axios.get(`http://localhost:4000/api/travel?source=${source}&destination=${destination}`)
+      .then(res => {
+        console.log(res.data)
+      })
+  }
 
   return (
     <div className="mt-4 bg-gray-100 -mx-8 px-8 pt-8">
@@ -28,12 +46,17 @@ const PlacePage = () => {
       <div className="mt-8 mb-8 grid gap-8 grid-cols-1 md:grid-cols-[2fr_1fr]">
         <div>
           <div className="my-4">
+            <input type="text" placeholder='source' value={source} onChange={e => setSource(e.target.value)}/>
+            <button onClick={handleTravelClick}>Set source</button>
             <h2 className="font-semibold text-2xl">Description</h2>
-            {place.description}
+            {/* {place.description} */}
+            <div>
+
+            </div>
           </div>
-          Check-in: {place.checkin}<br />
+          {/* Check-in: {place.checkin}<br />
           Check-out: {place.checkout}<br />
-          Max number of guests: {place.maxGuests}
+          Max number of guests: {place.maxGuests} */}
         </div>
         <div>
           <BookingWidget place={place} />

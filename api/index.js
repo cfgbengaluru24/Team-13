@@ -20,6 +20,7 @@ const fs = require('fs');
 const { resolve } = require('path');
 const { rejects } = require('assert');
 const Quiz = require('./schema/quiz');
+const Travel = require('./schema/Travel')
 const authenticateToken = require('./auth/authenticate');
 
 app.use(
@@ -335,27 +336,7 @@ app.post('/bookings', async (req, res) => {
     user: userData.id,
   });
 
-  app.get('/api/travel', async (req, res) => {
-    const { source, destination } = req.query;
-  console.log("here i am **")
-  const alltravels = await Travel.findOne({source: "Chicago"})
-  console.log(alltravels)
-    try {
-        console.log("here i am #######***");
-
-        const travelDetails = await Travel.find({ source: source, destination: destination });
-        console.log(travelDetails);
-        console.log("here i am #######***");
-
-        if (!travelDetails) {
-            return res.status(404).json({ message: 'Travel details not found' });
-        }
-
-        res.json(travelDetails);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
-});
+  
 
   res.json(doc);
   //.then((err,doc)=>{
@@ -364,6 +345,28 @@ app.post('/bookings', async (req, res) => {
   //     }
   //     res.json(doc);
   // })
+});
+
+app.get('/api/travel', async (req, res) => {
+  const { source, destination } = req.query;
+console.log("here i am **")
+const alltravels = await Travel.findOne({source: "Chicago"})
+console.log(alltravels)
+  try {
+      console.log("here i am #######***");
+
+      const travelDetails = await Travel.find({ source: source, destination: destination });
+      console.log(travelDetails);
+      console.log("here i am #######***");
+
+      if (!travelDetails) {
+          return res.status(404).json({ message: 'Travel details not found' });
+      }
+
+      res.json(travelDetails);
+  } catch (error) {
+      res.status(500).json({ message: 'Server error', error });
+  }
 });
 
 function getUserFromReq(req) {

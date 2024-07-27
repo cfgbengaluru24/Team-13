@@ -17,6 +17,9 @@ const multer=require('multer');
 const fs=require('fs');
 const { resolve } = require('path');
 const { rejects } = require('assert');
+const Quiz = require('./schema/quiz')
+const authenticateToken = require('./auth/authenticate')
+
 app.use(cors({
     credentials: true,
     origin: 'http://localhost:3000',
@@ -94,6 +97,30 @@ app.get('/profile', async (req, res) => {
     // You might want to remove this line because it's unreachable
     // res.json(`user info`);
 });
+
+app.post('/quiz', authenticateToken, async (req, res) => {
+
+    console.log(req.user?.selectedOption)
+    if(!req.user || req.user.selectedOption !== 'admin')
+        res.status(401).send("You are not authorized to create quiz")
+
+    const { title, description, questions } = req.body
+
+    try {
+        const quiz = new Quiz({
+            title,
+            description,
+            questions
+        });
+  
+        await quiz.save();
+        res.status(201).send('Quiz created successfully');
+    } catch (error) {
+      res.status(400).send('Error creating quiz: ' + error);
+    }
+})
+
+
 
 app.post('/logout',(req,res)=>{
     res.cookie('token','').json(true);

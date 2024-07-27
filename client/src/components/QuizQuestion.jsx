@@ -28,7 +28,7 @@ const QuizQuestion = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const data = { nameOfQuiz, question };
+      const data = { title: nameOfQuiz, questions:[question] };
       await axios.post('http://localhost:4000/quiz', data);
       alert('Quiz saved successfully!');
       // Optionally, reset the form here

@@ -4,7 +4,6 @@ import Perks from '../Perks';
 import PhotosUploader from '../PhotosUploader';
 import { Navigate, useParams } from 'react-router-dom';
 
-
 const PlacesFormPage = () => {
   const { id } = useParams(); 
   const [title, setTitle] = useState('');
@@ -80,8 +79,8 @@ const PlacesFormPage = () => {
     };
     if (id) {
       // update
-      await axios.put('http://localhost:4000/places', { 
-        id, ...placeData
+      await axios.put('http://localhost:4000/places', {
+        id, ...placeData,
       });
     } else {
       // new place
@@ -93,8 +92,8 @@ const PlacesFormPage = () => {
   async function saveQuiz(ev) {
     ev.preventDefault();
     const quizData = {
-      title: quizTitle,
-      questions: [question]
+      nameOfQuiz,
+      questions: [question],
     };
     await axios.post('http://localhost:4000/quiz', quizData);
   }

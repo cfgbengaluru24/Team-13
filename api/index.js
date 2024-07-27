@@ -6,6 +6,7 @@ const imageDownloader = require('image-downloader');
 const Place = require('./schema/Place');
 const Booking = require('./schema/Booking');
 const VolunteerRequest = require('./schema/volunteerRequest');
+const RequestVolunteer = require('./schema/Requestvolunteer');
 const bcrypt = require('bcryptjs');
 const dbConnect = require('./config/database');
 const { JsonWebTokenError } = require('jsonwebtoken');
@@ -441,6 +442,53 @@ app.post('/add-user-to-place', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
+app.post('/requests-volunteer', authenticateToken, async (req, res) => {
+    const { campId, userId } = req.body;
+  
+    try {
+      // Validate that the user is authenticated and has a trainer role
+      // Assuming req.user contains the authenticated user's information
+      const user = await Rg.findById(userId);
+      if (!user || user.selectedOption !== 'Trainer') {
+        return res.status(400).json({ error: 'User must have a trainer role' });
+      }
+  
+      // Validate that the camp exists
+      const camp = await Place.findById(campId);
+      if (!camp) {
+        return res.status(404).json({ error: 'Camp not found' });
+      }
+  
+      // Create the volunteer request
+      const volunteerRequest = await RequestVolunteer.create({
+        user: userId,
+        camp: campId,
+      });
+  
+      res.status(201).json(volunteerRequest);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+  
+  // Delete Volunteer Request
+  app.delete('/requests-volunteer/:id', authenticateToken, async (req, res) => {
+  
+    try {
+      const volunteerRequest = await RequestVolunteer.findByIdAndDelete(id);
+  
+      if (!volunteerRequest) {
+        return res.status(404).json({ error: 'Volunteer request not found' });
+      }
+    }catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to delete volunteer request' });
+      }
+    });
 
 dbConnect();
 

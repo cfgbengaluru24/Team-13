@@ -35,7 +35,7 @@ export default function AdminPage() {
 
   return (
     <div>
-      <input type="file" onChange={onChange} />
+      <input type="file" onChange={onChange} className="primary mt-4"/>
     </div>
   );
 }

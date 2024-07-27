@@ -109,9 +109,13 @@ app.post('/quiz', authenticateToken, async (req, res) => {
     res.status(401).send('You are not authorized to create quiz');
 
   const { title, description, questions } = req.body;
-    console.log(req.user?.selectedOption)
-    if(!req.user || req.user.selectedOption !== 'Admin')
-        res.status(401).send("You are not authorized to create quiz: " + req.user.selectedOption)
+  console.log(req.user?.selectedOption);
+  if (!req.user || req.user.selectedOption !== 'Admin')
+    res
+      .status(401)
+      .send(
+        'You are not authorized to create quiz: ' + req.user.selectedOption
+      );
 
   try {
     const quiz = new Quiz({
@@ -323,37 +327,35 @@ app.get('/bookings', async (req, res) => {
 //   });
 // Create Volunteer Request
 app.post('/volunteer-requests', authenticateToken, async (req, res) => {
-    const { campId } = req.body;
-  
-    try {
-      // Validate that the user is authenticated and has a trainer role
-      const userId = req.user.id; // Assuming req.user contains the authenticated user's information
-      const user = await Rg.findById(userId);
-      if (!user || user.selectedOption !== 'trainer') {
-        return res.status(400).json({ error: 'User must have a trainer role' });
-      }
-  
-      // Validate that the camp exists
-      const camp = await Place.findById(campId);
-      if (!camp) {
-        return res.status(404).json({ error: 'Camp not found' });
-      }
-  
-      // Create the volunteer request
-      const volunteerRequest = await VolunteerRequest.create({
-        user: userId,
-        camp: campId,
-      });
-  
-      res.status(201).json(volunteerRequest);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+  const { campId } = req.body;
+
+  try {
+    // Validate that the user is authenticated and has a trainer role
+    const userId = req.user.id; // Assuming req.user contains the authenticated user's information
+    const user = await Rg.findById(userId);
+    if (!user || user.selectedOption !== 'Trainer') {
+      return res.status(400).json({ error: 'User must have a trainer role' });
     }
-  });
-  
-  
-  
+
+    // Validate that the camp exists
+    const camp = await Place.findById(campId);
+    if (!camp) {
+      return res.status(404).json({ error: 'Camp not found' });
+    }
+
+    // Create the volunteer request
+    const volunteerRequest = await VolunteerRequest.create({
+      user: userId,
+      camp: campId,
+    });
+
+    res.status(201).json(volunteerRequest);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // Update Volunteer Request
 app.put('/volunteer-requests/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
@@ -362,7 +364,7 @@ app.put('/volunteer-requests/:id', authenticateToken, async (req, res) => {
   try {
     // Validate that the user is a trainer
     const user = await Rg.findById(req.user.id);
-    if (!user || user.selectedOption !== 'trainer') {
+    if (!user || user.selectedOption !== 'Trainer') {
       return res.status(400).json({ error: 'User must have a trainer role' });
     }
 
@@ -405,6 +407,38 @@ app.delete('/volunteer-requests/:id', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to delete volunteer request' });
+  }
+});
+
+app.post('/add-user-to-place', async (req, res) => {
+  const { placeId, userId } = req.body;
+
+  try {
+    // const user_ = await Rg.findById(req.user.id);
+    // if (!user_ || user_.selectedOption !== 'Admin') {
+    //   return res.status(400).json({ error: 'User must have a trainer role' });
+    // }
+
+    // Validate the place
+    const place = await Place.findById(placeId);
+    if (!place) {
+      return res.status(404).json({ error: 'Place not found' });
+    }
+
+    // Validate the user
+    const user = await Rg.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Add the user to the place
+    place.users.push(user._id);
+    await place.save();
+
+    res.status(200).json(place);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 

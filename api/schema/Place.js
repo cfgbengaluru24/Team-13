@@ -12,6 +12,8 @@ const PlaceSchema=new  mongoose.Schema({
     extraInfo:String,
     checkin:Number,
     checkout:Number,
+    users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Rg' }] // Array of user IDs
+
     
 })
 

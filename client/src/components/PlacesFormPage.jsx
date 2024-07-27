@@ -1,10 +1,11 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import Perks from '../Perks';
 import PhotosUploader from '../PhotosUploader';
 import { Navigate, useParams } from 'react-router-dom';
 
 const PlacesFormPage = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
   const [addedPhotos, setAddedPhotos] = useState('');
@@ -14,9 +15,10 @@ const PlacesFormPage = () => {
   const [checkin, setCheckin] = useState('');
   const [checkout, setCheckout] = useState('');
   const [redirect, setRedirect] = useState(false);
+
   // Quiz state
-  const [nameOfQuiz, setNameOfQuiz] = useState('');
-  const [question, setQuestion] = useState({ questionText: '', options: ['', ''], correctOption: '' });
+  const [quizTitle, setQuizTitle] = useState('');
+  const [question, setQuestion] = useState({ question_text: '', options: ['', ''], correct_option: '' });
 
   useEffect(() => {
     if (!id) {
@@ -40,8 +42,7 @@ const PlacesFormPage = () => {
     const placeData = {
       title, address, addedPhotos,
       description, perks, extraInfo,
-      checkin, checkout,
-      quiz: { nameOfQuiz, questions: [question] }
+      checkin, checkout
     };
     if (id) {
       // update
@@ -53,6 +54,15 @@ const PlacesFormPage = () => {
       await axios.post('http://localhost:4000/places', placeData);
     }
     setRedirect(true);
+  }
+
+  async function saveQuiz(ev) {
+    ev.preventDefault();
+    const quizData = {
+      title: quizTitle,
+      questions: [question]
+    };
+    await axios.post('http://localhost:4000/quiz', quizData);
   }
 
   const handleQuestionChange = (field, value) => {
@@ -122,10 +132,17 @@ const PlacesFormPage = () => {
             rows="6"
           />
         </div>
+        <div className="mb-4">
+          <label className="text-lg text-blue-600">Perks</label>
+          <p className="text-blue-400 text-sm">Select all the perks</p>
+          <div>
+            <Perks selected={perks} onChange={setPerks} />
+          </div>
+        </div>
 
         <div className="mb-4">
-          <label className="text-lg text-blue-600" htmlFor="extra-info">Extra Information</label>
-          <p className="text-blue-400 text-sm">Rules of the camp and the other information</p>
+          <label className="text-lg text-blue-600" htmlFor="extra-info">Extra Info</label>
+          <p className="text-blue-400 text-sm">Rules of the camp, etc.</p>
           <textarea
             value={extraInfo}
             onChange={ev => setExtraInfo(ev.target.value)}
@@ -161,63 +178,68 @@ const PlacesFormPage = () => {
           </div>
         </div>
 
-        {/* Quiz Section */}
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4">
+          Save
+        </button>
+      </form>
+
+      <h2 className="text-3xl font-semibold text-blue-600 mb-4 mt-6">Create Quiz</h2>
+      <form onSubmit={saveQuiz}>
         <div className="mb-4">
-          <h2 className="text-lg text-blue-600">Quiz</h2>
-          <label className="text-lg text-blue-600" htmlFor="quiz-name">Quiz Name</label>
+          <label className="text-lg text-blue-600" htmlFor="quiz-title">Quiz Title</label>
           <input
             type="text"
-            value={nameOfQuiz}
-            onChange={ev => setNameOfQuiz(ev.target.value)}
-            id="quiz-name"
+            value={quizTitle}
+            onChange={ev => setQuizTitle(ev.target.value)}
+            id="quiz-title"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-            placeholder="Quiz Name"
+            placeholder="Quiz Title"
           />
-          <div className="mb-4">
-            <label className="text-lg text-blue-600">Question</label>
-            <input
-              type="text"
-              value={question.questionText}
-              onChange={ev => handleQuestionChange('questionText', ev.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-              placeholder="Question"
-            />
-            {question.options.map((option, index) => (
-              <div key={index} className="flex items-center mb-2">
-                <input
-                  type="text"
-                  value={option}
-                  onChange={ev => handleOptionChange(index, ev.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                  placeholder={`Option ${index + 1}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => deleteOption(index)}
-                  className="ml-2 bg-red-500 text-white px-2 py-1 rounded-md"
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
-            <button type="button" onClick={addOption} className="bg-blue-500 text-white px-4 py-2 rounded-md">
-              Add Option
-            </button>
-            <div className="mt-2">
-              <label className="text-blue-600">Correct Option</label>
+        </div>
+        <div className="mb-4">
+          <label className="text-lg text-blue-600">Question</label>
+          <input
+            type="text"
+            value={question.question_text}
+            onChange={ev => handleQuestionChange('question_text', ev.target.value)}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Question"
+          />
+          {question.options.map((option, index) => (
+            <div key={index} className="flex items-center mb-2">
               <input
                 type="text"
-                value={question.correctOption}
-                onChange={ev => handleQuestionChange('correctOption', ev.target.value)}
+                value={option}
+                onChange={ev => handleOptionChange(index, ev.target.value)}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                placeholder="Correct Option"
+                placeholder={`Option ${index + 1}`}
               />
+              <button
+                type="button"
+                onClick={() => deleteOption(index)}
+                className="ml-2 bg-red-500 text-white px-2 py-1 rounded-md"
+              >
+                Delete
+              </button>
             </div>
+          ))}
+          <button type="button" onClick={addOption} className="bg-blue-500 text-white px-4 py-2 rounded-md">
+            Add Option
+          </button>
+          <div className="mt-2">
+            <label className="text-blue-600">Correct Option</label>
+            <input
+              type="text"
+              value={question.correct_option}
+              onChange={ev => handleQuestionChange('correct_option', ev.target.value)}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+              placeholder="Correct Option"
+            />
           </div>
         </div>
 
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
-          Save
+          Save Quiz
         </button>
       </form>
     </div>

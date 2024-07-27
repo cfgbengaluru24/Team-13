@@ -12,9 +12,7 @@ const PlaceSchema=new  mongoose.Schema({
     extraInfo:String,
     checkin:Number,
     checkout:Number,
-    maxGuests:Number,
-    price:Number,
-
+    
 })
 
 

@@ -95,8 +95,9 @@ app.get('/profile', async (req, res) => {
       if (err) {
         throw err;
       }
-      const { name, email, _id } = await Rg.findById(userData.id);
-      res.json({ name, email, _id });
+      const { name, email, _id, selectedOption } = await Rg.findById(userData.id);
+      console.log({name, email, _id, selectedOption})
+      res.json({ name, email, _id, selectedOption });
     });
   } else {
     res.json(null);

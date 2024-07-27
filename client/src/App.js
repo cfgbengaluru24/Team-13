@@ -16,7 +16,12 @@ import PlacePage from "./components/PlacePage";
 import BookingsPage from "./BookingsPage";
 import QuizQuestion from "./components/QuizQuestion";
 import Dashboard from "./Dashboard";
+import { UserContext } from "./UserContext";
+import { useContext } from "react";
+
 function App(){
+  const {user} = useContext(UserContext)
+  console.log(user)
   const [spin,setSpin]=useState(true);
   axios.defaults.withCredentials=true;
   useEffect(() => {
@@ -30,9 +35,9 @@ function App(){
   return (
     
 
-    <UserContextProvider  >
+    // <UserContextProvider  >
     <Routes>
-      <Route path="/" element={<Layout></Layout>}  >
+      <Route path="/" element={(user?.selectedOption === 'Trainer' || user?.selectedOption === 'Admin') ? <Layout></Layout> : <><Header /><Dashboard /></>}  >
         <Route index element={<Home/>}/>
         
         {spin ? (
@@ -43,22 +48,22 @@ function App(){
 
         <Route path="/register" element={<Register></Register>} ></Route>
         <Route path="/Account/?" element={<Account></Account>} ></Route>
-        <Route path="/Account/places" element={<PlacesPage></PlacesPage>} ></Route>
+        <Route path="/Account/places" element={(user?.selectedOption === 'Trainer' || user?.selectedOption === 'Admin') ? <PlacesPage></PlacesPage> : <Login />} ></Route>
         <Route path="/Account/places/new" element={<PlacesFormPage></PlacesFormPage>} ></Route>
         <Route path="/Account/places/:id" element={<PlacesFormPage></PlacesFormPage>} ></Route>
 
           <Route path="/place/:id" element={<PlacePage></PlacePage>} ></Route>
           <Route path="/Account/bookings"  element={<BookingsPage></BookingsPage>}  ></Route>
-          <Route path="/Account/quiz"  element={<QuizQuestion></QuizQuestion>}  ></Route>
+          <Route path="/Account/quiz"  element={user?.selectedOption === 'Admin' ? <QuizQuestion></QuizQuestion> : <Login />}  ></Route>
 
           <Route path="/Account/bookings/:id"  element={<BookingPage></BookingPage>}  ></Route>
-          <Route path="/trainee"  element={<Dashboard></Dashboard>}  ></Route>
+          <Route path="/trainee"  element={user?.selectedOption === 'Trainee' ? <Dashboard></Dashboard> : <Login />}  ></Route>
         
           
       </Route>
       
     </Routes>
-     </UserContextProvider>
+    //  {/* </UserContextProvider> */}
   );
 }
 export default App;

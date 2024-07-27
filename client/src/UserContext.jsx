@@ -11,6 +11,7 @@ export function UserContextProvider({children}){
         if(!user){
             const {data}= axios.get('http://localhost:4000/profile').then(({data,ready})=>{
                 setUser(data);
+                console.log("data:" + data)
                 setReady(true);
             });
             

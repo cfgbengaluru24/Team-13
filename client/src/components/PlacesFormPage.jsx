@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import Perks from '../Perks';
 import PhotosUploader from '../PhotosUploader';
 import { Navigate, useParams } from 'react-router-dom';
+
 const PlacesFormPage = () => {
-  const { id } = useParams();
+  const { id } = useParams(); 
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
   const [addedPhotos, setAddedPhotos] = useState('');
@@ -45,7 +46,7 @@ const PlacesFormPage = () => {
     };
     if (id) {
       // update
-      await axios.put('http://localhost:4000/places', { 
+      await axios.put('http://localhost:4000/places', {
         id, ...placeData
       });
     } else {
@@ -55,16 +56,26 @@ const PlacesFormPage = () => {
     setRedirect(true);
   }
 
-  async function saveQuiz(ev) {
-    ev.preventDefault();
-    const quizData = {
-      title: quizTitle,
-      questions: [question]
-    };
-    await axios.post('http://localhost:4000/quiz', quizData);
-  }
+  const handleQuestionChange = (field, value) => {
+    setQuestion({ ...question, [field]: value });
+  };
 
- if (redirect) {
+  const handleOptionChange = (index, value) => {
+    const newOptions = [...question.options];
+    newOptions[index] = value;
+    setQuestion({ ...question, options: newOptions });
+  };
+
+  const addOption = () => {
+    setQuestion({ ...question, options: [...question.options, ''] });
+  };
+
+  const deleteOption = (index) => {
+    const newOptions = question.options.filter((_, i) => i !== index);
+    setQuestion({ ...question, options: newOptions });
+  };
+
+  if (redirect) {
     return (<Navigate to={'/Account/places'} />);
   }
 
@@ -112,23 +123,16 @@ const PlacesFormPage = () => {
             rows="6"
           />
         </div>
-        <div className="mb-4">
-          <label className="text-lg text-blue-600">Perks</label>
-          <p className="text-blue-400 text-sm">Select all the perks</p>
-          <div>
-            <Perks selected={perks} onChange={setPerks} />
-          </div>
-        </div>
 
         <div className="mb-4">
-          <label className="text-lg text-blue-600" htmlFor="extra-info">Extra Info</label>
-          <p className="text-blue-400 text-sm">Rules of the camp, etc.</p>
+          <label className="text-lg text-blue-600" htmlFor="extra-info">Extra Information</label>
+          <p className="text-blue-400 text-sm">Rules of the camp and the other information</p>
           <textarea
             value={extraInfo}
             onChange={ev => setExtraInfo(ev.target.value)}
             id="extra-info"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-            placeholder="Extra Info"
+            placeholder="Extra Information"
             rows="6"
           />
         </div>
@@ -214,9 +218,8 @@ const PlacesFormPage = () => {
         </div>
 
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
-          Save Quiz
+          Save
         </button>
-        
       </form>
     </div>
   );

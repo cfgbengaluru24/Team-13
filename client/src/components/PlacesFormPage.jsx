@@ -2,7 +2,6 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import PhotosUploader from '../PhotosUploader';
 import { Navigate, useParams } from 'react-router-dom';
-
 const PlacesFormPage = () => {
   const { id } = useParams(); 
   const [title, setTitle] = useState('');
@@ -14,9 +13,6 @@ const PlacesFormPage = () => {
   const [checkin, setCheckin] = useState('');
   const [checkout, setCheckout] = useState('');
   const [redirect, setRedirect] = useState(false);
-  // Quiz state
-  const [nameOfQuiz, setNameOfQuiz] = useState('');
-  const [question, setQuestion] = useState({ questionText: '', options: ['', ''], correctOption: '' });
 
   useEffect(() => {
     if (!id) {
@@ -41,11 +37,11 @@ const PlacesFormPage = () => {
       title, address, addedPhotos,
       description, perks, extraInfo,
       checkin, checkout,
-      quiz: { nameOfQuiz, questions: [question] }
+      
     };
     if (id) {
       // update
-      await axios.put('http://localhost:4000/places', {
+      await axios.put('http://localhost:4000/places', { 
         id, ...placeData
       });
     } else {
@@ -55,26 +51,7 @@ const PlacesFormPage = () => {
     setRedirect(true);
   }
 
-  const handleQuestionChange = (field, value) => {
-    setQuestion({ ...question, [field]: value });
-  };
-
-  const handleOptionChange = (index, value) => {
-    const newOptions = [...question.options];
-    newOptions[index] = value;
-    setQuestion({ ...question, options: newOptions });
-  };
-
-  const addOption = () => {
-    setQuestion({ ...question, options: [...question.options, ''] });
-  };
-
-  const deleteOption = (index) => {
-    const newOptions = question.options.filter((_, i) => i !== index);
-    setQuestion({ ...question, options: newOptions });
-  };
-
-  if (redirect) {
+ if (redirect) {
     return (<Navigate to={'/Account/places'} />);
   }
 
@@ -161,64 +138,10 @@ const PlacesFormPage = () => {
           </div>
         </div>
 
-        {/* Quiz Section */}
-        <div className="mb-4">
-          <h2 className="text-lg text-blue-600">Quiz</h2>
-          <label className="text-lg text-blue-600" htmlFor="quiz-name">Quiz Name</label>
-          <input
-            type="text"
-            value={nameOfQuiz}
-            onChange={ev => setNameOfQuiz(ev.target.value)}
-            id="quiz-name"
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-            placeholder="Quiz Name"
-          />
-          <div className="mb-4">
-            <label className="text-lg text-blue-600">Question</label>
-            <input
-              type="text"
-              value={question.questionText}
-              onChange={ev => handleQuestionChange('questionText', ev.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-              placeholder="Question"
-            />
-            {question.options.map((option, index) => (
-              <div key={index} className="flex items-center mb-2">
-                <input
-                  type="text"
-                  value={option}
-                  onChange={ev => handleOptionChange(index, ev.target.value)}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                  placeholder={`Option ${index + 1}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => deleteOption(index)}
-                  className="ml-2 bg-red-500 text-white px-2 py-1 rounded-md"
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
-            <button type="button" onClick={addOption} className="bg-blue-500 text-white px-4 py-2 rounded-md">
-              Add Option
-            </button>
-            <div className="mt-2">
-              <label className="text-blue-600">Correct Option</label>
-              <input
-                type="text"
-                value={question.correctOption}
-                onChange={ev => handleQuestionChange('correctOption', ev.target.value)}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                placeholder="Correct Option"
-              />
-            </div>
-          </div>
-        </div>
-
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
           Save
         </button>
+        
       </form>
     </div>
   );

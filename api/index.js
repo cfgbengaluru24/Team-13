@@ -108,13 +108,10 @@ app.post('/quiz', authenticateToken, async (req, res) => {
   if (!req.user || req.user.selectedOption !== 'admin')
     res.status(401).send('You are not authorized to create quiz');
 
-<<<<<<< Updated upstream
   const { title, description, questions } = req.body;
-=======
     console.log(req.user?.selectedOption)
     if(!req.user || req.user.selectedOption !== 'Admin')
         res.status(401).send("You are not authorized to create quiz: " + req.user.selectedOption)
->>>>>>> Stashed changes
 
   try {
     const quiz = new Quiz({

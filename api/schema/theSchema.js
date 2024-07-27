@@ -18,6 +18,10 @@ const toSchema = new mongoose.Schema({
         type: String, // Corrected from email
         required: true,
         unique:true,
+    },
+    selectedOption: {
+        type: String,
+        required: true,
     }
 });
 

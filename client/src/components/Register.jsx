@@ -5,6 +5,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 const Register = () => {
     const [name,setName]=useState('');
+    const [selectedOption, setSelectedOption] = useState('');
     const [email,setEmail]=useState('');
     const [password,setPassword]=useState('');
 
@@ -15,6 +16,7 @@ const Register = () => {
           name,
           email,
           password,
+          selectedOption,
         });
         alert('success');
         }
@@ -31,7 +33,16 @@ const Register = () => {
 
             <input type='email'placeholder='Type your email' value={email} onChange={ev=>setEmail(ev.target.value)} ></input>
             <input type='password' placeholder='Password' value={password} onChange={ev=>setPassword(ev.target.value)} ></input>
-           
+            <select
+            value={selectedOption}
+            onChange={(event) => setSelectedOption(event.target.value)}
+            className='w-full p-2 mb-4 border rounded'
+          >
+            <option value=''>--Please choose an option--</option>
+            <option value='Trainee'>Trainee</option>
+            <option value='Trainer'>Trainer</option>
+            <option value='Admin'>Admin/Organization</option>
+          </select>
             <button className='primary' >Register</button>
 
             <div className='text-center py-2 text-gray-500'>Already have an Account? Click Here

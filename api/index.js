@@ -32,11 +32,11 @@ app.get('/test', (req, res) => {
 
 // Wrap the registration route in an async function
 app.post('/register', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, selectedOption} = req.body;
     
     try {
         
-        const output = await Rg.create({ name, email, password:bcrypt.hashSync(password,salt)});
+        const output = await Rg.create({ name, email,selectedOption, password:bcrypt.hashSync(password,salt)});
         res.json(output);
     } catch (error) {
         // alert('failed');

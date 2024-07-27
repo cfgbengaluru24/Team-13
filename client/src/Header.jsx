@@ -8,13 +8,13 @@ const Header = () => {
       <div>
       <header className=" flex justify-between">
         <Link to={'/'}>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 -rotate-90">
+        {/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 -rotate-90">
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-        </svg>
+        </svg> */}
         <span className="font-bold text-xl">EXPA INDIA</span>
         </Link>
         
-        <div className="flex gap-2 border border-gray-300 rounded-full py-2 px-4 shadow-md shadow-gray-300" >
+        {/* <div className="flex gap-2 border border-gray-300 rounded-full py-2 px-4 shadow-md shadow-gray-300" >
           <div>Add Camps</div>
           <div className="border border-l border-gray-300"></div>
           <div>Add Quiz</div>
@@ -27,7 +27,7 @@ const Header = () => {
   <div>Search</div>
 </button>
 
-        </div>
+        </div> */}
         <Link to={user?'/Account':'/login'} className="flex gap-2 border border-gray-300 rounded-full py-2 px-4 shadow-md shadow-gray-300" >
         <svg xmlns="http://www.w3.org/2000/svg" className='w-[40px]' fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />

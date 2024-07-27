@@ -3,20 +3,24 @@ import React, { useEffect, useState } from 'react';
 import Perks from '../Perks';
 import PhotosUploader from '../PhotosUploader';
 import { Navigate, useParams } from 'react-router-dom';
+
 const PlacesFormPage = () => {
   const { id } = useParams();
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
-  const [addedPhotos, setAddedPhotos] = useState('');
+  const [addedPhotos, setAddedPhotos] = useState([]);
   const [description, setDescription] = useState('');
-  const [perks, setPerks] = useState('');
+  const [perks, setPerks] = useState([]);
   const [extraInfo, setExtraInfo] = useState('');
   const [checkin, setCheckin] = useState('');
   const [checkout, setCheckout] = useState('');
   const [redirect, setRedirect] = useState(false);
-  // Quiz state
   const [nameOfQuiz, setNameOfQuiz] = useState('');
-  const [question, setQuestion] = useState({ questionText: '', options: ['', ''], correctOption: '' });
+  const [question, setQuestion] = useState({
+    questionText: '',
+    options: ['', ''],
+    correctOption: '',
+  });
 
   useEffect(() => {
     if (!id) {
@@ -35,18 +39,48 @@ const PlacesFormPage = () => {
     });
   }, [id]);
 
+  const handleQuestionChange = (field, value) => {
+    setQuestion(prevQuestion => ({
+      ...prevQuestion,
+      [field]: value,
+    }));
+  };
+
+  const handleOptionChange = (index, value) => {
+    setQuestion(prevQuestion => {
+      const newOptions = [...prevQuestion.options];
+      newOptions[index] = value;
+      return { ...prevQuestion, options: newOptions };
+    });
+  };
+
+  const addOption = () => {
+    setQuestion(prevQuestion => ({
+      ...prevQuestion,
+      options: [...prevQuestion.options, ''],
+    }));
+  };
+
+  const deleteOption = index => {
+    setQuestion(prevQuestion => {
+      const newOptions = [...prevQuestion.options];
+      newOptions.splice(index, 1);
+      return { ...prevQuestion, options: newOptions };
+    });
+  };
+
   async function savePlace(ev) {
     ev.preventDefault();
     const placeData = {
       title, address, addedPhotos,
       description, perks, extraInfo,
       checkin, checkout,
-      quiz: { nameOfQuiz, questions: [question] }
+      quiz: { nameOfQuiz, questions: [question] },
     };
     if (id) {
       // update
-      await axios.put('http://localhost:4000/places', { 
-        id, ...placeData
+      await axios.put('http://localhost:4000/places', {
+        id, ...placeData,
       });
     } else {
       // new place
@@ -58,13 +92,13 @@ const PlacesFormPage = () => {
   async function saveQuiz(ev) {
     ev.preventDefault();
     const quizData = {
-      title: quizTitle,
-      questions: [question]
+      nameOfQuiz,
+      questions: [question],
     };
     await axios.post('http://localhost:4000/quiz', quizData);
   }
 
- if (redirect) {
+  if (redirect) {
     return (<Navigate to={'/Account/places'} />);
   }
 
@@ -90,7 +124,7 @@ const PlacesFormPage = () => {
           <p className="text-blue-400 text-sm">Address to your camp</p>
           <input
             value={address}
-            onChange={(ev) => setAddress(ev.target.value)}
+            onChange={ev => setAddress(ev.target.value)}
             type="text"
             id="address"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"

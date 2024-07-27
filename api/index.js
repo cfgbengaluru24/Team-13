@@ -125,6 +125,16 @@ app.post('/quiz', authenticateToken, async (req, res) => {
     }
 })
 
+app.get('/quiz', async (req, res) => {
+    let results;
+    try {
+        results = await Quiz.find()
+        res.status(200).send({data: results})
+    } catch(error) {
+        res.status(400).send({error: error})
+    }
+})
+
 app.post('/checkQuizResponse', async (req, res) => {
     // console.log(req.user?.selectedOption)
     // if(!req.user || req.user.selectedOption !== 'Trainee')

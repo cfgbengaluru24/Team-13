@@ -18,6 +18,8 @@ const fs=require('fs');
 const { resolve } = require('path');
 const { rejects } = require('assert');
 const Quiz = require('./schema/quiz')
+const User = require('./schema/theSchema')
+const UserResponse = require('./schema/userResponse')
 const authenticateToken = require('./auth/authenticate')
 
 app.use(cors({
@@ -101,7 +103,7 @@ app.get('/profile', async (req, res) => {
 app.post('/quiz', authenticateToken, async (req, res) => {
 
     console.log(req.user?.selectedOption)
-    if(!req.user || req.user.selectedOption !== 'admin')
+    if(!req.user || req.user.selectedOption !== 'Admin')
         res.status(401).send("You are not authorized to create quiz")
 
     const { title, description, questions } = req.body
@@ -120,7 +122,71 @@ app.post('/quiz', authenticateToken, async (req, res) => {
     }
 })
 
+app.post('/checkQuizResponse', async (req, res) => {
+    // console.log(req.user?.selectedOption)
+    // if(!req.user || req.user.selectedOption !== 'Trainee')
+    //     res.status(401).send("You are not authorized to create quiz")
 
+    const { quizId, userId, responses } = req.body
+
+    try {
+
+        const quiz = await Quiz.findById(quizId)
+        if(!quiz)
+            res.status(400).send("Invalid Quiz Id")
+        let results = []
+
+        const user = await User.findById(userId)
+        if(!user)
+            res.status(400).send("Invalid User Id")
+
+        const existingUserResponse = await UserResponse.find({user_id: userId, quiz_id: quizId})
+        if(existingUserResponse)
+            res.status(400).send("User has already taken this quiz")
+
+        console.log(quiz)
+        var score = 0
+        for(var i = 0; i < responses.length ; i++) {
+            if(responses[i] === quiz.questions[i].correct_option)
+                score++
+            results.push({
+                selectedOption: responses[i],
+                correctOption: quiz.questions[i].correct_option
+            })
+        }
+
+        const userResponse = new UserResponse({
+            user_id: userId,
+            quiz_id: quizId,
+            score: score
+        })
+
+        await userResponse.save()
+
+        res.status(200).send({
+            quiz: quiz,
+            results: results,
+            score: score
+        })
+
+    } catch(error) {
+        res.status(400).send('Error: ' + error)
+    }
+})
+
+app.get('/score', authenticateToken, async (req, res) => {
+    if(!req.user || req.user.selectedOption !== 'trainee') {
+        res.status(400).send("Invalid User")
+    }
+
+    const quizResults = UserResponse.find({user_id: req.user._id})
+    for(var i = 0; i < quizResults.length ; i++) {
+        const quizResult = quizResults[i];
+        score += quizResult.score
+    }
+
+    res.status(200).send({score: score})
+})
 
 app.post('/logout',(req,res)=>{
     res.cookie('token','').json(true);

@@ -9,8 +9,8 @@ const authenticateToken = async (req, res, next) => {
   
       req.user = user;
       next();
-    } catch (error) {
-      res.status(400).send('Invalid Token');
+    } catch (error) {   
+      res.status(400).send('Invalid Token Received');
     }
   };
 

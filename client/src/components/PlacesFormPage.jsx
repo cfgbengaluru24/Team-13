@@ -5,7 +5,7 @@ import PhotosUploader from '../PhotosUploader';
 import { Navigate, useParams } from 'react-router-dom';
 
 const PlacesFormPage = () => {
-  const { id } = useParams();
+  const { id } = useParams(); 
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
   const [addedPhotos, setAddedPhotos] = useState([]);
@@ -146,23 +146,16 @@ const PlacesFormPage = () => {
             rows="6"
           />
         </div>
-        <div className="mb-4">
-          <label className="text-lg text-blue-600">Perks</label>
-          <p className="text-blue-400 text-sm">Select all the perks</p>
-          <div>
-            <Perks selected={perks} onChange={setPerks} />
-          </div>
-        </div>
 
         <div className="mb-4">
-          <label className="text-lg text-blue-600" htmlFor="extra-info">Extra Info</label>
-          <p className="text-blue-400 text-sm">Rules of the camp, etc.</p>
+          <label className="text-lg text-blue-600" htmlFor="extra-info">Extra Information</label>
+          <p className="text-blue-400 text-sm">Rules of the camp and the other information</p>
           <textarea
             value={extraInfo}
             onChange={ev => setExtraInfo(ev.target.value)}
             id="extra-info"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-            placeholder="Extra Info"
+            placeholder="Extra Information"
             rows="6"
           />
         </div>
@@ -248,9 +241,8 @@ const PlacesFormPage = () => {
         </div>
 
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
-          Save Quiz
+          Save
         </button>
-        
       </form>
     </div>
   );

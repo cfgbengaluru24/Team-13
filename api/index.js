@@ -106,7 +106,7 @@ app.get('/profile', async (req, res) => {
 
 app.post('/quiz', authenticateToken, async (req, res) => {
   console.log(req.user?.selectedOption);
-  if (!req.user || req.user.selectedOption !== 'admin')
+  if (!req.user || req.user.selectedOption !== 'Admin')
     res.status(401).send('You are not authorized to create quiz');
 
   const { title, description, questions } = req.body;

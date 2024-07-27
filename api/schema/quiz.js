@@ -6,9 +6,9 @@ const quizSchema = new Schema({
     description: { type: String },
     questions: [
       {
-        question_text: { type: String, required: true },
+        questionText: { type: String, required: true },
         options: [{ type: String, required: true }],
-        correct_option: { type: String, required: true }
+        correctOption: { type: String, required: true }
       }
     ]
   });

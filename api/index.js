@@ -22,6 +22,7 @@ const { rejects } = require('assert');
 const Quiz = require('./schema/quiz');
 const Travel = require('./schema/Travel')
 const authenticateToken = require('./auth/authenticate');
+const User = require('./schema/Excel');
 
 app.use(
   cors({
@@ -649,6 +650,46 @@ app.delete('/requests-volunteer/:id', async (req, res) => {
         }
     });
 });
+
+//index.js 
+
+app.post("/excel", async (req, res) => { 
+    const  newData  = req.body.newData; // newData should be an array of user objects
+  
+    console.log(newData)
+    try {
+        
+            // const { name, email, role } = newData[0];
+        for(const singleData of newData){
+            const name = singleData[0];
+            const email = singleData[1];
+            const role = singleData[2];
+  
+  
+            // Generate a random password
+            const randomPassword = ""
+  
+            // Create and save the user with the hashed password
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(randomPassword, salt);
+  
+            const user = await User.create({
+                name,
+                email,
+                password: hashedPassword,
+                role
+            });
+  
+            await user.save();
+        }
+        
+  
+        res.status(201).json({ message: 'Users registered successfully' });
+    } catch (error) {
+        console.error('Error registering users:', error);
+        res.status(500).json({ message: 'Error registering users', error });
+    }
+  });
 
 dbConnect();
 

@@ -16,6 +16,7 @@ import PlacePage from "./components/PlacePage";
 import BookingsPage from "./BookingsPage";
 import QuizQuestion from "./components/QuizQuestion";
 import Dashboard from "./Dashboard";
+import AdminPage from "./AdminPage";
 function App(){
   const [spin,setSpin]=useState(true);
   axios.defaults.withCredentials=true;
@@ -53,6 +54,8 @@ function App(){
 
           <Route path="/Account/bookings/:id"  element={<BookingPage></BookingPage>}  ></Route>
           <Route path="/trainee"  element={<Dashboard></Dashboard>}  ></Route>
+          <Route path="/admin"  element={<AdminPage></AdminPage>}  ></Route>
+          
         
           
       </Route>

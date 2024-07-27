@@ -386,6 +386,16 @@ app.get('/bookings', async (req, res) => {
 //     }
 //   });
 // Create Volunteer Request
+app.get('/volunteer-requests', async (req, res) => {
+    try {
+      const volunteerRequests = await VolunteerRequest.find().populate('user').populate('camp');
+      res.json(volunteerRequests);
+    } catch (err) {
+      res.status(500).json({ error: 'An error occurred' });
+    }
+  });
+  
+ 
 app.post('/volunteer-requests', authenticateToken, async (req, res) => {
   const { campId } = req.body;
 
@@ -502,52 +512,108 @@ app.post('/add-user-to-place', async (req, res) => {
   }
 });
 
+app.get('/requests-volunteer', async (req, res) => {
+    const { token } = req.cookies;
 
-app.post('/requests-volunteer', authenticateToken, async (req, res) => {
-    const { campId, userId } = req.body;
-  
-    try {
-      // Validate that the user is authenticated and has a trainer role
-      // Assuming req.user contains the authenticated user's information
-      const user = await Rg.findById(userId);
-      if (!user || user.selectedOption !== 'Trainer') {
-        return res.status(400).json({ error: 'User must have a trainer role' });
-      }
-  
-      // Validate that the camp exists
-      const camp = await Place.findById(campId);
-      if (!camp) {
-        return res.status(404).json({ error: 'Camp not found' });
-      }
-  
-      // Create the volunteer request
-      const volunteerRequest = await RequestVolunteer.create({
-        user: userId,
-        camp: campId,
-      });
-  
-      res.status(201).json(volunteerRequest);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+    if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
     }
-  });
-  
-  
-  // Delete Volunteer Request
-  app.delete('/requests-volunteer/:id', authenticateToken, async (req, res) => {
-  
-    try {
-      const volunteerRequest = await RequestVolunteer.findByIdAndDelete(id);
-  
-      if (!volunteerRequest) {
-        return res.status(404).json({ error: 'Volunteer request not found' });
-      }
-    }catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to delete volunteer request' });
-      }
+
+    jwt.verify(token, secret, async (err, userData) => {
+        if (err) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const userId = userData.id;
+
+        try {
+            const requests = await RequestVolunteer.find({ user: userId }).populate('camp');
+            res.json(requests);
+        } catch (error) {
+            console.error('Error fetching volunteer requests:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
     });
+});
+
+// POST volunteer request
+app.post('/requests-volunteer', async (req, res) => {
+    const { campId } = req.body;
+    const { token } = req.cookies;
+
+    if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+
+    jwt.verify(token, secret, async (err, userData) => {
+        if (err) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const userId = userData.id;
+
+        try {
+            // Validate that the user is a trainer
+            const user = await Rg.findById(userId);
+            if (!user || user.selectedOption !== 'Trainer') {
+                return res.status(400).json({ error: 'User must have a trainer role' });
+            }
+
+            // Validate that the camp exists
+            const camp = await Place.findById(campId);
+            if (!camp) {
+                return res.status(404).json({ error: 'Camp not found' });
+            }
+
+            // Create the volunteer request
+            const volunteerRequest = await RequestVolunteer.create({
+                user: userId,
+                camp: campId,
+            });
+
+            res.status(201).json(volunteerRequest);
+        } catch (error) {
+            console.error('Error creating volunteer request:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
+});
+
+// DELETE volunteer request
+app.delete('/requests-volunteer/:id', async (req, res) => {
+    const { id } = req.params;
+    const { token } = req.cookies;
+
+    if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+
+    jwt.verify(token, secret, async (err, userData) => {
+        if (err) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const userId = userData.id;
+
+        try {
+            const volunteerRequest = await RequestVolunteer.findById(id);
+
+            if (!volunteerRequest) {
+                return res.status(404).json({ error: 'Volunteer request not found' });
+            }
+
+            if (volunteerRequest.user.toString() !== userId) {
+                return res.status(403).json({ error: 'User not authorized to delete this request' });
+            }
+
+            await RequestVolunteer.findByIdAndDelete(id);
+            res.status(200).json({ message: 'Volunteer request deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting volunteer request:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
+});
 
 dbConnect();
 

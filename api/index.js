@@ -21,6 +21,7 @@ const { resolve } = require('path');
 const { rejects } = require('assert');
 const Quiz = require('./schema/quiz');
 const Travel = require('./schema/Travel')
+const UserResponse = require('./schema/userResponse')
 const authenticateToken = require('./auth/authenticate');
 const User = require('./schema/Excel');
 
@@ -127,15 +128,15 @@ app.post('/quiz', authenticateToken, async (req, res) => {
     }
 })
 
-app.get('/quiz', async (req, res) => {
-    let results;
-    try {
-        results = await Quiz.find()
-        res.status(200).send({data: results})
-    } catch(error) {
-        res.status(400).send({error: error})
-    }
-})
+  app.get('/quiz', async (req, res) => {
+      let results;
+      try {
+          results = await Quiz.find()
+          res.status(200).send({data: results})
+      } catch(error) {
+          res.status(400).send({error: error})
+      }
+  })
 
 app.post('/checkQuizResponse', async (req, res) => {
     // console.log(req.user?.selectedOption)
@@ -189,19 +190,40 @@ app.post('/checkQuizResponse', async (req, res) => {
     }
 })
 
+// app.get('/score', authenticateToken, async (req, res) => {
+//     if(!req.user || req.user.selectedOption !== 'trainee') {
+//         res.status(400).send("Invalid User")
+//     }
+//     var score = 0;
+//     const quizResults = UserResponse.find({user_id: req.user._id})
+//     for(var i = 0; i < quizResults.length ; i++) {
+//         const quizResult = quizResults[i];
+//         score += quizResult.score
+//     }
+
+//     res.status(200).send({score: score})
+// })
+
 app.get('/score', authenticateToken, async (req, res) => {
-    if(!req.user || req.user.selectedOption !== 'trainee') {
-        res.status(400).send("Invalid User")
+  try {
+    if (!req.user || req.user.selectedOption !== 'Trainee') {
+      return res.status(400).send("Invalid User");
     }
 
-    const quizResults = UserResponse.find({user_id: req.user._id})
-    for(var i = 0; i < quizResults.length ; i++) {
-        const quizResult = quizResults[i];
-        score += quizResult.score
-    }
+    let score = 0;
+    const quizResults = await UserResponse.find({ user_id: req.user._id });
+    
+    quizResults.forEach(quizResult => {
+      score += quizResult.score;
+    });
 
-    res.status(200).send({score: score})
-})
+    return res.status(200).send({ score: score });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal Server Error");
+  }
+});
+
 
 app.post('/logout', (req, res) => {
   res.cookie('token', '').json(true);

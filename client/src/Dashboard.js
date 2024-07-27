@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 // import { getPointsAndBadges, getActiveDays } from '../apiService'; // Correct import path
+import axios from 'axios';
 
 const Dashboard = () => {
-  const [points, setPoints] = useState(0);
-  const [badges, setBadges] = useState(0);
+  const [points, setPoints] = useState(110);
+  const [badges, setBadges] = useState(1);
   const [chartData, setChartData] = useState([
     { name: 'Day 1', activeDays: 3 },
     { name: 'Day 2', activeDays: 5 },
@@ -14,31 +15,72 @@ const Dashboard = () => {
     { name: 'Day 6', activeDays: 1 },
     { name: 'Day 7', activeDays: 6 },
   ]);
+  const [quizzes, setQuizzes] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState({});
 
-//   useEffect(() => {
-//     // Fetch points and badges
-//     getPointsAndBadges()
-//       .then(data => {
-//         setPoints(data.points);
-//         setBadges(data.badges);
-//       })
-//       .catch(error => {
-//         console.error('Error fetching points and badges:', error);
-//       });
+  useEffect(() => {
+    // // Fetch points and badges
+    // getPointsAndBadges()
+    //   .then(data => {
+    //     setPoints(data.points);
+    //     setBadges(data.badges);
+    //   })
+    //   .catch(error => {
+    //     console.error('Error fetching points and badges:', error);
+    //   });
 
-//     // Fetch active days
-//     getActiveDays()
-//       .then(data => {
-//         const updatedData = data.map((day, index) => ({
-//           name: `Day ${index + 1}`,
-//           activeDays: day.activeDays
-//         }));
-//         setChartData(updatedData);
-//       })
-//       .catch(error => {
-//         console.error('Error fetching active days:', error);
-//       });
-//   }, []);
+    // // Fetch active days
+    // getActiveDays()
+    //   .then(data => {
+    //     const updatedData = data.map((day, index) => ({
+    //       name: `Day ${index + 1}`,
+    //       activeDays: day.activeDays
+    //     }));
+    //     setChartData(updatedData);
+    //   })
+    //   .catch(error => {
+    //     console.error('Error fetching active days:', error);
+    //   });
+
+    // Fetch quizzes
+    axios.get('http://localhost:4000/quiz')
+      .then(response => {
+        console.log(response);
+        setQuizzes(response.data.data);
+      })
+      .catch(error => {
+        console.error('Error fetching quizzes:', error);
+      });
+  }, []);
+
+  const handleOptionChange = (questionId, option) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [questionId]: option,
+    }));
+  };
+
+  const handleSubmitQuiz = () => {
+    let score = 0;
+
+    quizzes.forEach(quiz => {
+      quiz.questions.forEach((question, index) => {
+        
+        if (selectedOptions[index] === question.correctOption) {
+          score += 100;
+        }
+      });
+    });
+
+    if (score>=100) {
+      setPoints(prev => prev + 10);
+      // Update badges on the server if needed
+      axios.get('http://localhost:4000/score')
+        .catch(error => {
+          console.error('Error updating badges:', error);
+        });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 m-8">
@@ -75,26 +117,39 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Recommended Section */}
-        <div className="mt-6 bg-white p-6 rounded-lg shadow-md flex flex-col item-center justify-center">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4 text-center flex item-center justify-center">Active Days</h2>
-          <div className='flex item-center justify-center'>
-            <BarChart
-              width={600}
-              height={300}
-              data={chartData}
-              margin={{
-                top: 5, right: 30, left: 20, bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="activeDays" fill="#a3e693" />
-            </BarChart>
-          </div>
+
+        {/* Quiz Section */}
+        <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">Quiz</h2>
+          {quizzes.map(quiz => (
+            <div key={quiz._id} className="mb-4">
+              <h3 className="text-lg font-bold mb-2">{quiz.title}</h3>
+              {quiz.questions.map(question => (
+                <div key={question._id} className="mb-2">
+                  <p className="font-semibold">{question.question_text}</p>
+                  {question.options.map(option => (
+                    <div key={option} className="flex items-center mb-1">
+                      <input
+                        type="radio"
+                        id={`${question._id}-${option}`}
+                        name={question._id}
+                        value={option}
+                        checked={selectedOptions[question._id] === option}
+                        onChange={() => handleOptionChange(question._id, option)}
+                      />
+                      <label htmlFor={`${question._id}-${option}`} className="ml-2">{option}</label>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ))}
+          <button
+            onClick={handleSubmitQuiz}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4"
+          >
+            Submit Quiz
+          </button>
         </div>
       </div>
     </div>

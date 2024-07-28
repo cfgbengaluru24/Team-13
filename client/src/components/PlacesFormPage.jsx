@@ -115,7 +115,7 @@ const PlacesFormPage = () => {
             onChange={ev => setTitle(ev.target.value)}
             id="title"
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-            placeholder="Title"
+            placeholder="State"
           />
         </div>
 

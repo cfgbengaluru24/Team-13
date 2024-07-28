@@ -24,11 +24,9 @@ export default function BookingWidget({place}) {
     numberOfNights = differenceInCalendarDays(new Date(checkout), new Date(checkin));
   }
 
-  async function bookThisPlace() {
-    const response = await axios.post('http://localhost:4000/bookings', {
-      checkin,checkout,numberOfGuests,name,phone,
-      place:place._id,
-      price:numberOfNights * place.price,
+  async function putVolunteerRequest() {
+    const response = await axios.post('http://localhost:4000/volunteer-requests', {
+      campId:place._id
     });
     const bookingId = response.data._id;
     setRedirect(`/Account/bookings/${bookingId}`);
@@ -77,11 +75,8 @@ export default function BookingWidget({place}) {
         )}
          
       </div> */}
-      <button onClick={bookThisPlace} className="primary mt-4">
+      <button onClick={putVolunteerRequest} className="primary mt-4">
         Volunteer
-      </button>
-      <button onClick={bookThisPlace} className="primary mt-4">
-        Cancel
       </button>
     </div>
   );

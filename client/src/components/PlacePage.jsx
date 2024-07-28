@@ -60,8 +60,8 @@ const PlacePage = () => {
     <div className="mt-4 bg-gray-100 -mx-8 px-8 pt-8">
       <h1 className="text-3xl">{place.title}</h1>
       {/* <AddressLink>{place.address}</AddressLink> */}
-      {/* <a  target='_blank' href={'https://maps.google.com/?q='+place.address}  className=' font-500 my-2 block font-semibold underline'  >{place.address}</a> */}
-      {/* <h2>{place.address}</h2> */}
+      <a  target='_blank' href={'https://maps.google.com/?q='+place.address}  className=' font-500 my-2 block font-semibold underline'  >{place.address}</a> 
+      {/* {/* <h2>{place.address}</h2> */}
       {/* <PlaceGallery place={place} /> */}
       <div className="mt-8 mb-8 grid gap-8 grid-cols-1 md:grid-cols-[2fr_1fr]">
         <div>

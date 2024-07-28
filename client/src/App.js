@@ -38,7 +38,7 @@ function App(){
 
     // <UserContextProvider  >
     <Routes>
-      <Route path="/" element={(user?.selectedOption === 'Trainer' || user?.selectedOption === 'Admin') ? <Layout></Layout> : <><Header /><Dashboard /></>}  >
+      <Route path="/" element={<Layout></Layout>}  >
         <Route index element={<Home/>}/>
         
         {spin ? (

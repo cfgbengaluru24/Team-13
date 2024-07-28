@@ -185,7 +185,7 @@ const PlacesFormPage = () => {
           </div>
         </div>
 
-        {/* Quiz Section */}
+        {/* {/* Quiz Section
         <div className="mb-4">
           <h2 className="text-lg text-blue-600">Quiz</h2>
           <label className="text-lg text-blue-600" htmlFor="quiz-name">Quiz Name</label>
@@ -238,7 +238,7 @@ const PlacesFormPage = () => {
               />
             </div>
           </div>
-        </div>
+        </div> */}
 
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
           Save

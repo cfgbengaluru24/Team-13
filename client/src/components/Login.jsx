@@ -48,12 +48,12 @@ const Login = () => {
             className='w-full p-2 mb-2 border rounded'
           />
           <button className='primary w-full p-2 mb-2 border rounded'>Login</button>
-          <div className='text-center py-2 text-gray-500'>
+          {/* <div className='text-center py-2 text-gray-500'>
             Don't have an Account? Click Here
             <Link className='underline text-blue' to={'/register'}>
               Register
             </Link>
-          </div>
+          </div> */}
         </form>
       </div>
     </div>

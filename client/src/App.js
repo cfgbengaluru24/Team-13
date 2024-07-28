@@ -19,6 +19,7 @@ import Dashboard from "./Dashboard";
 import { UserContext } from "./UserContext";
 import { useContext } from "react";
 
+import AdminPage from "./AdminPage";
 function App(){
   const {user} = useContext(UserContext)
   console.log(user)
@@ -57,7 +58,9 @@ function App(){
           <Route path="/Account/quiz"  element={user?.selectedOption === 'Admin' ? <QuizQuestion></QuizQuestion> : <Login />}  ></Route>
 
           <Route path="/Account/bookings/:id"  element={<BookingPage></BookingPage>}  ></Route>
-          <Route path="/trainee"  element={user?.selectedOption === 'Trainee' ? <Dashboard></Dashboard> : <Login />}  ></Route>
+          <Route path="/trainee"  element={<Dashboard></Dashboard>}  ></Route>
+          <Route path="/admin"  element={<AdminPage></AdminPage>}  ></Route>
+          
         
           
       </Route>

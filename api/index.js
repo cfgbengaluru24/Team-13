@@ -21,7 +21,9 @@ const { resolve } = require('path');
 const { rejects } = require('assert');
 const Quiz = require('./schema/quiz');
 const Travel = require('./schema/Travel')
+const UserResponse = require('./schema/userResponse')
 const authenticateToken = require('./auth/authenticate');
+const User = require('./schema/Excel');
 
 app.use(
   cors({
@@ -127,15 +129,15 @@ app.post('/quiz', authenticateToken, async (req, res) => {
     }
 })
 
-app.get('/quiz', async (req, res) => {
-    let results;
-    try {
-        results = await Quiz.find()
-        res.status(200).send({data: results})
-    } catch(error) {
-        res.status(400).send({error: error})
-    }
-})
+  app.get('/quiz', async (req, res) => {
+      let results;
+      try {
+          results = await Quiz.find()
+          res.status(200).send({data: results})
+      } catch(error) {
+          res.status(400).send({error: error})
+      }
+  })
 
 app.post('/checkQuizResponse', async (req, res) => {
     // console.log(req.user?.selectedOption)
@@ -189,19 +191,40 @@ app.post('/checkQuizResponse', async (req, res) => {
     }
 })
 
+// app.get('/score', authenticateToken, async (req, res) => {
+//     if(!req.user || req.user.selectedOption !== 'trainee') {
+//         res.status(400).send("Invalid User")
+//     }
+//     var score = 0;
+//     const quizResults = UserResponse.find({user_id: req.user._id})
+//     for(var i = 0; i < quizResults.length ; i++) {
+//         const quizResult = quizResults[i];
+//         score += quizResult.score
+//     }
+
+//     res.status(200).send({score: score})
+// })
+
 app.get('/score', authenticateToken, async (req, res) => {
-    if(!req.user || req.user.selectedOption !== 'trainee') {
-        res.status(400).send("Invalid User")
+  try {
+    if (!req.user || req.user.selectedOption !== 'Trainee') {
+      return res.status(400).send("Invalid User");
     }
 
-    const quizResults = UserResponse.find({user_id: req.user._id})
-    for(var i = 0; i < quizResults.length ; i++) {
-        const quizResult = quizResults[i];
-        score += quizResult.score
-    }
+    let score = 0;
+    const quizResults = await UserResponse.find({ user_id: req.user._id });
+    
+    quizResults.forEach(quizResult => {
+      score += quizResult.score;
+    });
 
-    res.status(200).send({score: score})
-})
+    return res.status(200).send({ score: score });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal Server Error");
+  }
+});
+
 
 app.post('/logout', (req, res) => {
   res.cookie('token', '').json(true);
@@ -422,6 +445,16 @@ app.get('/bookings', async (req, res) => {
 //     }
 //   });
 // Create Volunteer Request
+app.get('/volunteer-requests', async (req, res) => {
+    try {
+      const volunteerRequests = await VolunteerRequest.find().populate('user').populate('camp');
+      res.json(volunteerRequests);
+    } catch (err) {
+      res.status(500).json({ error: 'An error occurred' });
+    }
+  });
+  
+ 
 app.post('/volunteer-requests', authenticateToken, async (req, res) => {
   const { campId } = req.body;
 
@@ -538,52 +571,148 @@ app.post('/add-user-to-place', async (req, res) => {
   }
 });
 
+app.get('/requests-volunteer', async (req, res) => {
+    const { token } = req.cookies;
 
-app.post('/requests-volunteer', authenticateToken, async (req, res) => {
-    const { campId, userId } = req.body;
+    if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+
+    jwt.verify(token, secret, async (err, userData) => {
+        if (err) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const userId = userData.id;
+
+        try {
+            const requests = await RequestVolunteer.find({ user: userId }).populate('camp');
+            res.json(requests);
+        } catch (error) {
+            console.error('Error fetching volunteer requests:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
+});
+
+// POST volunteer request
+app.post('/requests-volunteer', async (req, res) => {
+    const { campId } = req.body;
+    const { token } = req.cookies;
+
+    if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+
+    jwt.verify(token, secret, async (err, userData) => {
+        if (err) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const userId = userData.id;
+
+        try {
+            // Validate that the user is a trainer
+            const user = await Rg.findById(userId);
+            if (!user || user.selectedOption !== 'Trainer') {
+                return res.status(400).json({ error: 'User must have a trainer role' });
+            }
+
+            // Validate that the camp exists
+            const camp = await Place.findById(campId);
+            if (!camp) {
+                return res.status(404).json({ error: 'Camp not found' });
+            }
+
+            // Create the volunteer request
+            const volunteerRequest = await RequestVolunteer.create({
+                user: userId,
+                camp: campId,
+            });
+
+            res.status(201).json(volunteerRequest);
+        } catch (error) {
+            console.error('Error creating volunteer request:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
+});
+
+// DELETE volunteer request
+app.delete('/requests-volunteer/:id', async (req, res) => {
+    const { id } = req.params;
+    const { token } = req.cookies;
+
+    if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+
+    jwt.verify(token, secret, async (err, userData) => {
+        if (err) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const userId = userData.id;
+
+        try {
+            const volunteerRequest = await RequestVolunteer.findById(id);
+
+            if (!volunteerRequest) {
+                return res.status(404).json({ error: 'Volunteer request not found' });
+            }
+
+            if (volunteerRequest.user.toString() !== userId) {
+                return res.status(403).json({ error: 'User not authorized to delete this request' });
+            }
+
+            await RequestVolunteer.findByIdAndDelete(id);
+            res.status(200).json({ message: 'Volunteer request deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting volunteer request:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
+});
+
+//index.js 
+
+app.post("/excel", async (req, res) => { 
+    const  newData  = req.body.newData; // newData should be an array of user objects
   
+    console.log(newData)
     try {
-      // Validate that the user is authenticated and has a trainer role
-      // Assuming req.user contains the authenticated user's information
-      const user = await Rg.findById(userId);
-      if (!user || user.selectedOption !== 'Trainer') {
-        return res.status(400).json({ error: 'User must have a trainer role' });
-      }
+        
+            // const { name, email, role } = newData[0];
+        for(const singleData of newData){
+            const name = singleData[0];
+            const email = singleData[1];
+            const role = singleData[2];
   
-      // Validate that the camp exists
-      const camp = await Place.findById(campId);
-      if (!camp) {
-        return res.status(404).json({ error: 'Camp not found' });
-      }
   
-      // Create the volunteer request
-      const volunteerRequest = await RequestVolunteer.create({
-        user: userId,
-        camp: campId,
-      });
+            // Generate a random password
+            const randomPassword = ""
   
-      res.status(201).json(volunteerRequest);
+            // Create and save the user with the hashed password
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(randomPassword, salt);
+  
+            const user = await User.create({
+                name,
+                email,
+                password: hashedPassword,
+                role
+            });
+  
+            await user.save();
+        }
+        
+  
+        res.status(201).json({ message: 'Users registered successfully' });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error registering users:', error);
+        res.status(500).json({ message: 'Error registering users', error });
     }
   });
-  
-  
-  // Delete Volunteer Request
-  app.delete('/requests-volunteer/:id', authenticateToken, async (req, res) => {
-  
-    try {
-      const volunteerRequest = await RequestVolunteer.findByIdAndDelete(id);
-  
-      if (!volunteerRequest) {
-        return res.status(404).json({ error: 'Volunteer request not found' });
-      }
-    }catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to delete volunteer request' });
-      }
-    });
 
 dbConnect();
 
